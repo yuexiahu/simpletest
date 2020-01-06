@@ -1,6 +1,5 @@
-#define SIMPLETEST_ENABLE_DEBUG
+//#define SIMPLETEST_ENABLE_DEBUG
 #include "simpletest.h"
-#include <stdio.h>
 
 SIMPLETEST_DEF();
 
@@ -67,5 +66,6 @@ int main()
     RUN_TEST(test_divide);
     RUN_TEST(test_concat);
     RUN_TEST(test_step);
+
     return 0;
 }
