@@ -1,4 +1,4 @@
-//#define SIMPLETEST_ENABLE_DEBUG
+#define SIMPLETEST_ENABLE_DEBUG
 #include "simpletest.h"
 #include <stdio.h>
 
@@ -63,9 +63,9 @@ void test_step()
 
 int main()
 {
-    RUN_CASE(test_sum);
-    RUN_CASE(test_divide);
-    RUN_CASE(test_concat);
-    RUN_CASE(test_step);
+    RUN_TEST(test_sum);
+    RUN_TEST(test_divide);
+    RUN_TEST(test_concat);
+    RUN_TEST(test_step);
     return 0;
 }

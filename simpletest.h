@@ -28,13 +28,13 @@
 #define simpletest_gettick() (clock() / (1000000 / CLOCKS_PER_SEC))
 
 /// 运行测试用例
-#define RUN_CASE(test_case)                                                                        \
+#define RUN_TEST(test_case)                                                                        \
     do                                                                                             \
     {                                                                                              \
         unsigned start_tick_ = simpletest_gettick();                                               \
         double pass_ = 100;                                                                        \
         simpletest_output("==========================================================\n");         \
-        simpletest_output("CASE " #test_case "\n");                                                \
+        simpletest_output("RUN_TEST: " #test_case "\n");                                            \
         simpletest_reset();                                                                        \
         extern void test_case();                                                                   \
         test_case();                                                                               \
@@ -44,13 +44,13 @@
         }                                                                                          \
         if(simpletest_pass() < simpletest_count())                                                 \
         {                                                                                          \
-            simpletest_warn("FAILED %d/%d (%3.2f%%) passed in %0.3f ms\n", simpletest_pass(),      \
+            simpletest_warn("FAILED  : %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),            \
                             simpletest_count(), pass_,                                             \
                             (simpletest_gettick() - start_tick_) / 1000.);                         \
         }                                                                                          \
         else                                                                                       \
         {                                                                                          \
-            simpletest_output("PASSED %d/%d (%3.2f%%) passed in %0.3f ms\n", simpletest_pass(),    \
+            simpletest_output("PASSED  : %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),          \
                               simpletest_count(), pass_,                                           \
                               (simpletest_gettick() - start_tick_) / 1000.);                       \
         }                                                                                          \
