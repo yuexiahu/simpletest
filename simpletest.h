@@ -132,26 +132,41 @@
         }                                                                      \
     } while(0)
 
-#define TEST_CMP(require, expect, cmp, actual, format)                         \
-    TEST((require), (expect)cmp(actual),                                       \
-         "  ==>  %s " #cmp " %s\n"                                             \
-         "  ==>  " format " " #cmp " " format "\n"                             \
-         "  ==>  %s\n",                                                        \
-         #expect, #actual, (expect), (actual), (result ? "true" : "false"))
+#define TEST_CMP(require, expect, cmp, actual, type, format)                   \
+    do                                                                         \
+    {                                                                          \
+        type expect_ = (expect);                                               \
+        type actual_ = (actual);                                               \
+        TEST((require), expect_ cmp actual_,                                   \
+             "  ==>  %s " #cmp " %s\n"                                         \
+             "  ==>  " format " " #cmp " " format "\n"                         \
+             "  ==>  %s\n",                                                    \
+             #expect, #actual, expect_, actual_, (result ? "true" : "false")); \
+    } while(0)
 
-#define TEST_OP(require, op, expect, actual, format)                           \
-    TEST((require), op((expect), (actual)),                                    \
-         "  ==>  " #op "(%s, %s)\n"                                            \
-         "  ==>  " #op "(" format ", " format ")\n"                            \
-         "  ==>  %s\n",                                                        \
-         #expect, #actual, (expect), (actual), (result ? "true" : "false"))
+#define TEST_OP(require, op, expect, actual, type, format)                     \
+    do                                                                         \
+    {                                                                          \
+        type expect_ = (expect);                                               \
+        type actual_ = (actual);                                               \
+        TEST((require), op(expect_, actual_),                                  \
+             "  ==>  " #op "(%s, %s)\n"                                        \
+             "  ==>  " #op "(" format ", " format ")\n"                        \
+             "  ==>  %s\n",                                                    \
+             #expect, #actual, expect_, actual_, (result ? "true" : "false")); \
+    } while(0)
 
-#define TEST_OPA(require, op, expect, actual, format, ...)                     \
-    TEST((require), op((expect), (actual), ##__VA_ARGS__),                     \
-         "  ==>  " #op "(%s, %s, " #__VA_ARGS__ ")\n"                          \
-         "  ==>  " #op "(" format ", " format ", " #__VA_ARGS__ ")\n"          \
-         "  ==>  %s\n",                                                        \
-         #expect, #actual, (expect), (actual), (result ? "true" : "false"))
+#define TEST_OPA(require, op, expect, actual, type, format, ...)               \
+    do                                                                         \
+    {                                                                          \
+        type expect_ = (expect);                                               \
+        type actual_ = (actual);                                               \
+        TEST((require), op(expect_, actual_, ##__VA_ARGS__),                   \
+             "  ==>  " #op "(%s, %s, " #__VA_ARGS__ ")\n"                      \
+             "  ==>  " #op "(" format ", " format ", " #__VA_ARGS__ ")\n"      \
+             "  ==>  %s\n",                                                    \
+             #expect, #actual, expect_, actual_, (result ? "true" : "false")); \
+    } while(0)
 
 #define TEST_EXP(require, expression, format, ...)                             \
     TEST((require), (expression),                                              \
@@ -191,26 +206,29 @@
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
-#define EXPECT_EQ_INT(expect, actual) TEST_CMP(0, expect, ==, actual, "%d")
+#define EXPECT_EQ_INT(expect, actual) TEST_CMP(0, expect, ==, actual, int, "%d")
 /**
  * @brief 要求2个整数表达式相等
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
-#define REQUIRE_EQ_INT(expect, actual) TEST_CMP(1, expect, ==, actual, "%d")
+#define REQUIRE_EQ_INT(expect, actual)                                         \
+    TEST_CMP(1, expect, ==, actual, int, "%d")
 
 /**
  * @brief 期望2个浮点数表达式相等
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
-#define EXPECT_EQ_DOUBLE(expect, actual) TEST_CMP(0, expect, ==, actual, "%f")
+#define EXPECT_EQ_DOUBLE(expect, actual)                                       \
+    TEST_CMP(0, expect, ==, actual, double, "%f")
 /**
  * @brief 要求2个浮点数表达式相等
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
-#define REQUIRE_EQ_DOUBLE(expect, actual) TEST_CMP(1, expect, ==, actual, "%f")
+#define REQUIRE_EQ_DOUBLE(expect, actual)                                      \
+    TEST_CMP(1, expect, ==, actual, double, "%f")
 
 /**
  * @brief 期望2个字符串表达式相等
@@ -218,7 +236,7 @@
  * @param actual 实际表达式
  */
 #define EXPECT_EQ_STR(expect, actual)                                          \
-    TEST_OP(0, simpletest_eq_str, expect, actual, "\"%s\"")
+    TEST_OP(0, simpletest_eq_str, expect, actual, const char*, "\"%s\"")
 /**
  * @brief 期望2个字符串表达式前len个字符相等
  * @param expect 期望表达式
@@ -226,14 +244,14 @@
  * @param len 字符长度
  */
 #define EXPECT_EQ_STRN(expect, actual, len)                                    \
-    TEST_OPA(0, simpletest_eq_strn, expect, actual, "\"%s\"", len)
+    TEST_OPA(0, simpletest_eq_strn, expect, actual, const char*, "\"%s\"", len)
 /**
  * @brief 要求2个字符串表达式相等
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
 #define REQUIRE_EQ_STR(expect, actual)                                         \
-    TEST_OP(1, simpletest_eq_str, expect, actual, "\"%s\"")
+    TEST_OP(1, simpletest_eq_str, expect, actual, const char*, "\"%s\"")
 /**
  * @brief 要求2个字符串表达式前len个字符相等
  * @param expect 期望表达式
@@ -241,7 +259,7 @@
  * @param len 字符长度
  */
 #define REQUIRE_EQ_STRN(expect, actual, len)                                   \
-    TEST_OPA(1, simpletest_eq_strn, expect, actual, "\"%s\"", len)
+    TEST_OPA(1, simpletest_eq_strn, expect, actual, const char*, "\"%s\"", len)
 
 /**
  * @brief 期望2块内存相等
@@ -250,7 +268,7 @@
  * @param len 内存长度
  */
 #define EXPECT_EQ_MEM(expect, actual, len)                                     \
-    TEST_OPA(1, simpletest_eq_mem, expect, actual, "%p", len)
+    TEST_OPA(1, simpletest_eq_mem, expect, actual, const void*, "%p", len)
 /**
  * @brief 要求2块内存相等
  * @param expect 期望表达式
@@ -258,7 +276,7 @@
  * @param len 内存长度
  */
 #define REQUIRE_EQ_MEM(expect, actual, len)                                    \
-    TEST_OPA(1, simpletest_eq_mem, expect, actual, "%p", len)
+    TEST_OPA(1, simpletest_eq_mem, expect, actual, const void*, "%p", len)
 
 /**
  * @brief 执行一次测试，记录结果
