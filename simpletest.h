@@ -136,30 +136,17 @@
              title, #expect, #actual, expect_, actual_, (result ? "true" : "false"));              \
     } while(0)
 
-#define TEST_OP(title, require, op, expect, actual, type, format)                                  \
-    do                                                                                             \
-    {                                                                                              \
-        type expect_ = (expect);                                                                   \
-        type actual_ = (actual);                                                                   \
-        TEST((require), op(expect_, actual_),                                                      \
-             "  %s\n"                                                                              \
-             "    ==>  " #op "(%s, %s)\n"                                                          \
-             "    ==>  " #op "(" format ", " format ")\n"                                          \
-             "    ==>  %s\n",                                                                      \
-             title, #expect, #actual, expect_, actual_, (result ? "true" : "false"));              \
-    } while(0)
-
-#define TEST_OPA(title, require, op, expect, actual, type, format, ...)                            \
+#define TEST_OP(title, require, op, expect, actual, type, format, ...)                             \
     do                                                                                             \
     {                                                                                              \
         type expect_ = (expect);                                                                   \
         type actual_ = (actual);                                                                   \
         TEST((require), op(expect_, actual_, ##__VA_ARGS__),                                       \
              "  %s\n"                                                                              \
-             "    ==>  " #op "(%s, %s, " #__VA_ARGS__ ")\n"                                        \
-             "    ==>  " #op "(" format ", " format ", " #__VA_ARGS__ ")\n"                        \
+             "    ==>  " STRINGFY_FUNC(op, expect, actual, ##__VA_ARGS__)"\n"                      \
+             "    ==>  " STRINGFY_FUNC(op, format, format, ##__VA_ARGS__)"\n"                      \
              "    ==>  %s\n",                                                                      \
-             title, #expect, #actual, expect_, actual_, (result ? "true" : "false"));              \
+             title, expect_, actual_, (result ? "true" : "false"));                                \
     } while(0)
 
 #define TEST_EXP(title, require, expression, format, ...)                                          \
@@ -239,7 +226,7 @@
  */
 #define EXPECT_EQ_STR(expect, actual)                                                              \
     TEST_OP(STRINGFY_FUNC(EXPECT_EQ_STR, expect, actual), 0, simpletest_eq_str, expect, actual,    \
-            const char*, "\"%s\"")
+            const char*, "%s")
 /**
  * @brief 期望2个字符串表达式前len个字符相等
  * @param expect 期望表达式
@@ -247,8 +234,8 @@
  * @param len 字符长度
  */
 #define EXPECT_EQ_STRN(expect, actual, len)                                                        \
-    TEST_OPA(STRINGFY_FUNC(EXPECT_EQ_STRN, expect, actual), 0, simpletest_eq_strn, expect, actual, \
-             const char*, "\"%s\"", len)
+    TEST_OP(STRINGFY_FUNC(EXPECT_EQ_STRN, expect, actual), 0, simpletest_eq_strn, expect, actual,  \
+             const char*, "%s", len)
 /**
  * @brief 要求2个字符串表达式相等
  * @param expect 期望表达式
@@ -256,7 +243,7 @@
  */
 #define REQUIRE_EQ_STR(expect, actual)                                                             \
     TEST_OP(STRINGFY_FUNC(REQUIRE_EQ_STR, expect, actual), 1, simpletest_eq_str, expect, actual,   \
-            const char*, "\"%s\"")
+            const char*, "%s")
 /**
  * @brief 要求2个字符串表达式前len个字符相等
  * @param expect 期望表达式
@@ -264,8 +251,8 @@
  * @param len 字符长度
  */
 #define REQUIRE_EQ_STRN(expect, actual, len)                                                       \
-    TEST_OPA(STRINGFY_FUNC(REQUIRE_EQ_STRN, expect, actual), 1, simpletest_eq_strn, expect,        \
-             actual, const char*, "\"%s\"", len)
+    TEST_OP(STRINGFY_FUNC(REQUIRE_EQ_STRN, expect, actual), 1, simpletest_eq_strn, expect,         \
+             actual, const char*, "%s", len)
 
 /**
  * @brief 期望2块内存相等
@@ -274,8 +261,8 @@
  * @param len 内存长度
  */
 #define EXPECT_EQ_MEM(expect, actual, len)                                                         \
-    TEST_OPA(STRINGFY_FUNC(EXPECT_EQ_MEM, expect, actual), 0, simpletest_eq_mem, expect, actual,   \
-             const void*, "%p", len)
+    TEST_OP(STRINGFY_FUNC(EXPECT_EQ_MEM, expect, actual), 0, simpletest_eq_mem, expect, actual,    \
+             const void*, %p, len)
 /**
  * @brief 要求2块内存相等
  * @param expect 期望表达式
@@ -283,8 +270,8 @@
  * @param len 内存长度
  */
 #define REQUIRE_EQ_MEM(expect, actual, len)                                                        \
-    TEST_OPA(STRINGFY_FUNC(REQUIRE_EQ_MEM, expect, actual), 1, simpletest_eq_mem, expect, actual,  \
-             const void*, "%p", len)
+    TEST_OP(STRINGFY_FUNC(REQUIRE_EQ_MEM, expect, actual), 1, simpletest_eq_mem, expect, actual,   \
+             const void*, %p, len)
 
 /**
  * @brief 执行一次测试，记录结果
