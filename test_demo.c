@@ -16,7 +16,7 @@ static void next_step()
     step_++;
 }
 
-static void test_sum()
+CASE(test_sum)
 {
     EXPECT_EQ_INT(0, sum(0, 0));
     EXPECT_EQ_INT(0, sum(1, -1));
@@ -24,14 +24,14 @@ static void test_sum()
     EXPECT_EQ_INT(-1, sum(-1, 0));
 }
 
-static void test_divide()
+CASE(test_divide)
 {
     EXPECT_EQ_DOUBLE(0.0, divide(0.0, 2.0));
     EXPECT_EQ_DOUBLE(1.0, divide(2.0, 2.0));
     EXPECT_EQ_DOUBLE(2.0, divide(4.0, 2.0));
 }
 
-static void test_concat()
+CASE(test_concat)
 {
     char string[256] = "";
     EXPECT_EQ_STR("", string);
@@ -45,7 +45,7 @@ static void test_concat()
     EXPECT_EQ_MEM("abcdef", string, 6);
 }
 
-static void test_step()
+CASE(test_step)
 {
     REQUIRE(step_ == 0);
     REQUIRE((next_step(), step_ == 1), "step_ is %d\n", step_);
@@ -55,10 +55,8 @@ static void test_step()
     REQUIRE((next_step(), step_ == 5), "step_ is %d\n", step_);
 }
 
-void test_demo_entry()
-{
-    RUN_TEST(test_sum);
-    RUN_TEST(test_divide);
-    RUN_TEST(test_concat);
-    RUN_TEST(test_step);
-}
+UNIT(test_demo_entry,
+        test_sum,
+        test_divide,
+        test_concat,
+        test_step)

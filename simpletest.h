@@ -2,8 +2,8 @@
  * @file simpletest.h
  * @brief 简单单元测试
  * @author hzh
- * @version 1.4
- * @date 2019-12-25
+ * @version 1.5
+ * @date 2020-04-16
  */
 #ifndef SIMPLETEST_H_
 #define SIMPLETEST_H_
@@ -64,17 +64,23 @@
     } while(0)
 #endif
 
-/// 运行测试用例
-#define RUN_TEST(test_case)                                                                        \
-    do                                                                                             \
+
+/**
+ * @brief 定义测试用例, 生成名为case的函数
+ * @param case 测试用例名称
+ * @note 后面接大括号编写函数体
+ */
+#define CASE(case)                                                                                 \
+    static void case_##case();                                                                     \
+    static void case()                                                                             \
     {                                                                                              \
         unsigned start_tick_, end_tick_;                                                           \
         double pass_ = 100;                                                                        \
-        simpletest_output("==========================================================\n");         \
-        simpletest_output("RUN_TEST: " #test_case "\n");                                           \
+        simpletest_output("----------------------------------------------------------\n");         \
+        simpletest_output("CASE: "#case "\n");                                                     \
         simpletest_reset();                                                                        \
         simpletest_gettick(start_tick_);                                                           \
-        test_case();                                                                               \
+        case_##case();                                                                             \
         simpletest_gettick(end_tick_);                                                             \
         if(simpletest_count() > 1)                                                                 \
         {                                                                                          \
@@ -82,29 +88,73 @@
         }                                                                                          \
         if(simpletest_pass() < simpletest_count())                                                 \
         {                                                                                          \
-            simpletest_warn("FAILED  : %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),          \
+            simpletest_warn("CASE: "#case": %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),     \
                             simpletest_count(), pass_, (end_tick_ - start_tick_) / 1000.);         \
         }                                                                                          \
         else                                                                                       \
         {                                                                                          \
-            simpletest_output("PASSED  : %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),        \
+            simpletest_output("CASE: "#case": %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),   \
                               simpletest_count(), pass_, (end_tick_ - start_tick_) / 1000.);       \
         }                                                                                          \
-    } while(0)
+    }                                                                                              \
+    static void case_##case()
 
 /**
- * @brief 给定测试函数列表生成一个统一的入口函数
- * @param entry 入口函数名称
- * @param ... 测试函数列表,原型必须是void(*)()
+ * @brief 定义测试单元,生成名为unit的函数
+ * @param unit 测试单元名称
+ * @param ... 测试用例列表
+ */
+#define UNIT(unit, ...)                                                                            \
+    void unit()                                                                                    \
+    {                                                                                              \
+        int index = 0;                                                                             \
+        int pass = 0, count = 0;                                                                   \
+        double pass_ = 100;                                                                        \
+        unsigned start_tick_, end_tick_;                                                           \
+        void (*cases[])() = {__VA_ARGS__};                                                         \
+        simpletest_output("==========================================================\n");         \
+        simpletest_output("UNIT: %s\n", #unit);                                                    \
+        simpletest_gettick(start_tick_);                                                           \
+        for(index = 0; index < sizeof(cases) / sizeof(void*); ++index)                             \
+        {                                                                                          \
+            cases[index]();                                                                        \
+            pass += simpletest_pass();                                                             \
+            count += simpletest_count();                                                           \
+        }                                                                                          \
+        simpletest_gettick(end_tick_);                                                             \
+        if(simpletest_count() > 1)                                                                 \
+        {                                                                                          \
+            pass_ = pass * 100.0 / count;                                                          \
+        }                                                                                          \
+        simpletest_output("----------------------------------------------------------\n");         \
+        if(simpletest_pass() < simpletest_count())                                                 \
+        {                                                                                          \
+            simpletest_warn("UNIT: "#unit": %d/%d (%3.2f%%) in %0.3f ms\n", pass,                  \
+                            count, pass_, (end_tick_ - start_tick_) / 1000.);                      \
+        }                                                                                          \
+        else                                                                                       \
+        {                                                                                          \
+            simpletest_output("UNIT: "#unit": %d/%d (%3.2f%%) in %0.3f ms\n", pass,                \
+                              count, pass_, (end_tick_ - start_tick_) / 1000.);                    \
+        }                                                                                          \
+        simpletest_output("==========================================================\n");         \
+    }
+
+/**
+ * @brief 执行单元测试，生成名为entry的入口函数
+ * @param entry 入口函数名称,也可直接生成main函数
+ * @param ... 测试单元列表
+ * @note 只能在源文件中定义一次
  */
 #define SIMPLETEST_LIST(entry, ...)                                                                \
+    SIMPLETEST_DEF();                                                                              \
     int entry()                                                                                    \
     {                                                                                              \
         int index = 0;                                                                             \
-        void (*entrys[])() = {__VA_ARGS__};                                                        \
-        for(index = 0; index < sizeof(entrys) / sizeof(void*); ++index)                            \
+        void (*units[])() = {__VA_ARGS__};                                                         \
+        for(index = 0; index < sizeof(units) / sizeof(void*); ++index)                             \
         {                                                                                          \
-            entrys[index]();                                                                       \
+            units[index]();                                                                        \
         }                                                                                          \
         simpletest_output("All test finished: %s\n",                                               \
                           simpletest_result() ? "PASSED" : "FALIED");                              \
@@ -123,7 +173,7 @@
         int result = simpletest_test(expression);                                                  \
         if(!result)                                                                                \
         {                                                                                          \
-            simpletest_warn("  [%d] %s:%s:%d: FAILED:\n" format "\n", simpletest_count(),          \
+            simpletest_warn("[%d] %s:%s:%d: FAILED:\n" format "\n", simpletest_count(),            \
                             simpletest_truncat_path(__FILE__), __FUNCTION__, __LINE__,             \
                             ##__VA_ARGS__);                                                        \
             if(require)                                                                            \
@@ -133,7 +183,7 @@
         }                                                                                          \
         else                                                                                       \
         {                                                                                          \
-            simpletest_debug("  [%d] %s:%s:%d: PASSED:\n" format "\n", simpletest_count(),         \
+            simpletest_debug("[%d] %s:%s:%d: PASSED:\n" format "\n", simpletest_count(),           \
                              simpletest_truncat_path(__FILE__), __FUNCTION__, __LINE__,            \
                              ##__VA_ARGS__);                                                       \
         }                                                                                          \
@@ -380,6 +430,7 @@ const char* simpletest_truncat_path(const char* path);
 
 /**
  * @brief 必须在主函数外定义一次，包含相关函数定义
+ * @note 使用SIMPLETEST_LIST则无需再定义
  */
 #define SIMPLETEST_DEF()                                                                           \
     static int test_result_ = 1;                                                                   \
