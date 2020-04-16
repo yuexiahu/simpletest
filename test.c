@@ -1,3 +1,5 @@
+#define SIMPLETEST_ENABLE_DEBUG
+
 #include "simpletest.h"
 
 SIMPLETEST_DEF()

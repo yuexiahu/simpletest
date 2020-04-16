@@ -1,0 +1,21 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+AccessModifierOffset: -4
+ColumnLimit: 100
+---
+Language: Cpp
+BreakBeforeBraces: Allman
+BreakConstructorInitializersBeforeComma: true
+DerivePointerAlignment: false
+PointerAlignment: Left
+FixNamespaceComments: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+AlwaysBreakAfterReturnType: None
+PenaltyReturnTypeOnItsOwnLine: 1000
+SpaceBeforeParens: Never
