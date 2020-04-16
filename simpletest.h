@@ -93,6 +93,24 @@
     } while(0)
 
 /**
+ * @brief 给定测试函数列表生成一个统一的入口函数
+ * @param entry 入口函数名称
+ * @param ... 测试函数列表,原型必须是void(*)()
+ */
+#define SIMPLETEST_LIST(entry, ...)                                                                \
+    int entry()                                                                                    \
+    {                                                                                              \
+        int index = 0;                                                                             \
+        void (*entrys[])() = {__VA_ARGS__};                                                        \
+        for(index = 0; index < sizeof(entrys) / sizeof(void*); ++index)                            \
+        {                                                                                          \
+            entrys[index]();                                                                       \
+        }                                                                                          \
+        simpletest_output("All test finished: %s\n",                                               \
+                          simpletest_result() ? "PASSED" : "FALIED");                              \
+    }
+
+/**
  * @brief 期望表达式为真，输出指定内容
  * @param require 条件是否必须成功,非0将在测试失败后结束程序
  * @param expression 表达式

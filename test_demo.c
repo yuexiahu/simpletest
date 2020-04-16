@@ -1,4 +1,3 @@
-#define SIMPLETEST_ENABLE_DEBUG
 #include "simpletest.h"
 
 static int sum(int a, int b)
