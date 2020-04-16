@@ -131,7 +131,7 @@
         TEST((require), expect_ cmp actual_,                                                       \
              "  %s\n"                                                                              \
              "    ==>  %s " #cmp " %s\n"                                                           \
-             "    ==>  " format " " #cmp " " format "\n"                                           \
+             "    ==>  " #format " " #cmp " " #format "\n"                                         \
              "    ==>  %s\n",                                                                      \
              title, #expect, #actual, expect_, actual_, (result ? "true" : "false"));              \
     } while(0)
@@ -195,14 +195,14 @@
  * @param actual 实际表达式
  */
 #define EXPECT_EQ_INT(expect, actual)                                                              \
-    TEST_CMP(STRINGFY_FUNC(EXPECT_EQ_INT, expect, actual), 0, expect, ==, actual, int, "%d")
+    TEST_CMP(STRINGFY_FUNC(EXPECT_EQ_INT, expect, actual), 0, expect, ==, actual, int, %d)
 /**
  * @brief 要求2个整数表达式相等
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
 #define REQUIRE_EQ_INT(expect, actual)                                                             \
-    TEST_CMP(STRINGFY_FUNC(REQUIRE_EQ_INT, expect, actual), 1, expect, ==, actual, int, "%d")
+    TEST_CMP(STRINGFY_FUNC(REQUIRE_EQ_INT, expect, actual), 1, expect, ==, actual, int, %d)
 
 /**
  * @brief 期望2个浮点数表达式相等
@@ -210,14 +210,14 @@
  * @param actual 实际表达式
  */
 #define EXPECT_EQ_DOUBLE(expect, actual)                                                           \
-    TEST_CMP(STRINGFY_FUNC(EXPECT_EQ_DOUBLE, expect, actual), 0, expect, ==, actual, double, "%f")
+    TEST_CMP(STRINGFY_FUNC(EXPECT_EQ_DOUBLE, expect, actual), 0, expect, ==, actual, double, %f)
 /**
  * @brief 要求2个浮点数表达式相等
  * @param expect 期望表达式
  * @param actual 实际表达式
  */
 #define REQUIRE_EQ_DOUBLE(expect, actual)                                                          \
-    TEST_CMP(STRINGFY_FUNC(REQUIRE_EQ_DOUBLE, expect, actual), 1, expect, ==, actual, double, "%f")
+    TEST_CMP(STRINGFY_FUNC(REQUIRE_EQ_DOUBLE, expect, actual), 1, expect, ==, actual, double, %f)
 
 /**
  * @brief 期望2个字符串表达式相等
