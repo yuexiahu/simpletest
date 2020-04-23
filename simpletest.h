@@ -458,7 +458,7 @@ enum SIMPLETEST_FLAG
  *
  * @param flags 可选参数，见 SIMPLETEST_FLAG
  */
-#define SIMPLETEST_CONFIG(...)                                                                     \
+#define SIMPLETEST_CONF(...)                                                                       \
     static int test_result_ = 1;                                                                   \
     static int test_count_ = 0;                                                                    \
     static int test_pass_ = 0;                                                                     \
@@ -550,7 +550,6 @@ enum SIMPLETEST_FLAG
             ++p;                                                                                   \
         }                                                                                          \
         return path;                                                                               \
-    }                                                                                              \
-    /*SIMPLETEST_DEF() END*/
+    }
 
 #endif // SIMPLETEST_H_
