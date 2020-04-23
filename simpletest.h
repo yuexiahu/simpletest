@@ -48,13 +48,6 @@
 #define simpletest_warn(fmt, ...) simpletest_output("\e[31m" fmt "\e[0m", ##__VA_ARGS__)
 #endif
 
-/// 在包含头文件前定义，可打印输出通过的测试
-#ifdef SIMPLETEST_ENABLE_DEBUG
-#define simpletest_debug(fmt, ...) simpletest_output(fmt, ##__VA_ARGS__)
-#else
-#define simpletest_debug(fmt, ...)
-#endif
-
 /// 微妙级时间获取函数
 #ifndef simpletest_gettick
 #define simpletest_gettick(tick)                                                                   \
@@ -76,8 +69,11 @@
     {                                                                                              \
         unsigned start_tick_, end_tick_;                                                           \
         double pass_ = 100;                                                                        \
-        simpletest_output("----------------------------------------------------------\n");         \
-        simpletest_output("CASE: "#case "\n");                                                     \
+        if(simpletest_flag(SIMPLETEST_ENABLE_CASE_OUTPUT))                                         \
+        {                                                                                          \
+            simpletest_output("----------------------------------------------------------\n");     \
+            simpletest_output("CASE: "#case "\n");                                                 \
+        }                                                                                          \
         simpletest_reset();                                                                        \
         simpletest_gettick(start_tick_);                                                           \
         case_##case();                                                                             \
@@ -91,7 +87,7 @@
             simpletest_warn("CASE: "#case": %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),     \
                             simpletest_count(), pass_, (end_tick_ - start_tick_) / 1000.);         \
         }                                                                                          \
-        else                                                                                       \
+        else if(simpletest_flag(SIMPLETEST_ENABLE_CASE_OUTPUT))                                    \
         {                                                                                          \
             simpletest_output("CASE: "#case": %d/%d (%3.2f%%) in %0.3f ms\n", simpletest_pass(),   \
                               simpletest_count(), pass_, (end_tick_ - start_tick_) / 1000.);       \
@@ -112,8 +108,11 @@
         double pass_ = 100;                                                                        \
         unsigned start_tick_, end_tick_;                                                           \
         void (*cases[])() = {__VA_ARGS__};                                                         \
-        simpletest_output("==========================================================\n");         \
-        simpletest_output("UNIT: %s\n", #unit);                                                    \
+        if(simpletest_flag(SIMPLETEST_ENABLE_UNIT_OUTPUT))                                         \
+        {                                                                                          \
+            simpletest_output("==========================================================\n");     \
+            simpletest_output("UNIT: %s\n", #unit);                                                \
+        }                                                                                          \
         simpletest_gettick(start_tick_);                                                           \
         for(index = 0; index < sizeof(cases) / sizeof(void*); ++index)                             \
         {                                                                                          \
@@ -122,22 +121,28 @@
             count += simpletest_count();                                                           \
         }                                                                                          \
         simpletest_gettick(end_tick_);                                                             \
-        if(simpletest_count() > 1)                                                                 \
+        if(count > 1)                                                                              \
         {                                                                                          \
             pass_ = pass * 100.0 / count;                                                          \
         }                                                                                          \
-        simpletest_output("----------------------------------------------------------\n");         \
-        if(simpletest_pass() < simpletest_count())                                                 \
+        if(simpletest_flag(SIMPLETEST_ENABLE_CASE_OUTPUT))                                         \
+        {                                                                                          \
+            simpletest_output("----------------------------------------------------------\n");     \
+        }                                                                                          \
+        if(pass < count)                                                                           \
         {                                                                                          \
             simpletest_warn("UNIT: "#unit": %d/%d (%3.2f%%) in %0.3f ms\n", pass,                  \
                             count, pass_, (end_tick_ - start_tick_) / 1000.);                      \
         }                                                                                          \
-        else                                                                                       \
+        else if(simpletest_flag(SIMPLETEST_ENABLE_UNIT_OUTPUT))                                    \
         {                                                                                          \
             simpletest_output("UNIT: "#unit": %d/%d (%3.2f%%) in %0.3f ms\n", pass,                \
                               count, pass_, (end_tick_ - start_tick_) / 1000.);                    \
         }                                                                                          \
-        simpletest_output("==========================================================\n");         \
+        if(simpletest_flag(SIMPLETEST_ENABLE_UNIT_OUTPUT))                                         \
+        {                                                                                          \
+            simpletest_output("==========================================================\n");     \
+        }                                                                                          \
     }
 
 /**
@@ -147,7 +152,6 @@
  * @note 只能在源文件中定义一次
  */
 #define SIMPLETEST_LIST(entry, ...)                                                                \
-    SIMPLETEST_DEF();                                                                              \
     int entry()                                                                                    \
     {                                                                                              \
         int index = 0;                                                                             \
@@ -181,9 +185,9 @@
                 exit(1);                                                                           \
             }                                                                                      \
         }                                                                                          \
-        else                                                                                       \
+        else if(simpletest_flag(SIMPLETEST_ENABLE_TEST_OUTPUT))                                    \
         {                                                                                          \
-            simpletest_debug("[%d] %s:%s:%d: PASSED:\n" format "\n", simpletest_count(),           \
+            simpletest_output("[%d] %s:%s:%d: PASSED:\n" format "\n", simpletest_count(),          \
                              simpletest_truncat_path(__FILE__), __FUNCTION__, __LINE__,            \
                              ##__VA_ARGS__);                                                       \
         }                                                                                          \
@@ -382,6 +386,15 @@ int simpletest_count();
 int simpletest_pass();
 
 /**
+ * @brief 获取是否存在标记
+ *
+ * @param flag 标记
+ *
+ * @return 是否存在标记
+ */
+int simpletest_flag(int flag);
+
+/**
  * @brief 字符串比较函数，支持NULL
  *
  * @param s1 字符串1
@@ -428,14 +441,28 @@ int simpletest_eq_mem(const void* m1, const void* m2, size_t len);
  */
 const char* simpletest_truncat_path(const char* path);
 
+#define PRIV_SIMPLETEST_GET_N(x, n, ...) n
+#define PRIV_SIMPLETEST_GET(...) PRIV_SIMPLETEST_GET_N(__VA_ARGS__, 0)
+
+enum SIMPLETEST_FLAG
+{
+    SIMPLETEST_ENABLE_TEST_OUTPUT = 0x0001, /// 开启测试函数的输出
+    SIMPLETEST_ENABLE_CASE_OUTPUT = 0x0002, /// 开启测试用例的输出
+    SIMPLETEST_ENABLE_UNIT_OUTPUT = 0x0004, /// 开启测试单元的输出
+
+    SIMPLETEST_ENABLE_ALL_OUTPUT  = 0x0007, /// 开启全部输出
+};
+
 /**
- * @brief 必须在主函数外定义一次，包含相关函数定义
- * @note 使用SIMPLETEST_LIST则无需再定义
+ * @brief 必须在主函数外执行一次，包含相关函数定义
+ *
+ * @param flags 可选参数，见 SIMPLETEST_FLAG
  */
-#define SIMPLETEST_DEF()                                                                           \
+#define SIMPLETEST_CONFIG(...)                                                                     \
     static int test_result_ = 1;                                                                   \
     static int test_count_ = 0;                                                                    \
     static int test_pass_ = 0;                                                                     \
+    static int test_flag_ = PRIV_SIMPLETEST_GET(0, ##__VA_ARGS__);                                 \
     int simpletest_test(int equality)                                                              \
     {                                                                                              \
         ++test_count_;                                                                             \
@@ -466,6 +493,10 @@ const char* simpletest_truncat_path(const char* path);
     int simpletest_pass()                                                                          \
     {                                                                                              \
         return test_pass_;                                                                         \
+    }                                                                                              \
+    int simpletest_flag(int flag)                                                                  \
+    {                                                                                              \
+        return !!(test_flag_ & flag);                                                              \
     }                                                                                              \
     int simpletest_eq_str(const char* s1, const char* s2)                                          \
     {                                                                                              \
