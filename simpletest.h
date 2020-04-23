@@ -22,19 +22,13 @@
         QueryPerformanceCounter(&cur_tick);                                                        \
         tick = (unsigned)cur_tick.QuadPart;                                                        \
     } while(0)
-#define simpletest_output(fmt, ...)                                                                \
-    do                                                                                             \
-    {                                                                                              \
-        HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);                                          \
-        SetConsoleTextAttribute(hStdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);     \
-        printf(fmt, ##__VA_ARGS__);                                                                \
-    } while(0)
 #define simpletest_warn(fmt, ...)                                                                  \
     do                                                                                             \
     {                                                                                              \
         HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);                                          \
         SetConsoleTextAttribute(hStdout, FOREGROUND_RED);                                          \
         printf(fmt, ##__VA_ARGS__);                                                                \
+        SetConsoleTextAttribute(hStdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);     \
     } while(0)
 #endif
 
