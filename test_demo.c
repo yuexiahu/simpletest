@@ -31,7 +31,7 @@ CASE(test_divide)
     EXPECT_EQ_DOUBLE(2.0, divide(4.0, 2.0));
 }
 
-CASE(test_concat)
+CASE_REPEAT(test_concat, 10000)
 {
     char string[256] = "";
     EXPECT_EQ_STR("", string);
