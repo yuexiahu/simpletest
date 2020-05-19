@@ -203,6 +203,7 @@
         }                                                                                          \
         simpletest_output("All test finished: %s\n",                                               \
                           simpletest_result() ? "PASSED" : "FALIED");                              \
+        return simpletest_result() ? 0 : 1;                                                        \
     }
 
 /**
