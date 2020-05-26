@@ -2,8 +2,8 @@
  * @file simpletest.h
  * @brief 简单单元测试
  * @author hzh
- * @version 1.5
- * @date 2020-04-16
+ * @version 1.6
+ * @date 2020-05-26
  */
 #ifndef SIMPLETEST_H_
 #define SIMPLETEST_H_
@@ -121,17 +121,17 @@
         }                                                                                          \
         if(simpletest_pass() < simpletest_count())                                                 \
         {                                                                                          \
-            simpletest_warn("CASE: "#case"*%d: %d/%d (%3.2f%%) in "                                \
-                            "worst:%0.3f best:%0.3f avg: %0.3f ms\n", count, simpletest_pass(),    \
-                            simpletest_count(), pass_, worst_/1000., best_/1000.,                  \
-                            (end_tick-start_tick)/1000./(count));                                  \
+            simpletest_warn("CASE: "#case"*%d: %d/%d (%3.2f%%) in %0.3f ms "                       \
+                            "(%0.3f/%0.3f/%0.3f ms)\n", count, simpletest_pass(),                  \
+                            simpletest_count(), pass_, (end_tick-start_tick)/1000., worst_/1000.,  \
+                            (end_tick-start_tick)/1000./(count), best_/1000.);                     \
         }                                                                                          \
         else if(simpletest_flag(SIMPLETEST_ENABLE_CASE_OUTPUT))                                    \
         {                                                                                          \
-            simpletest_output("CASE: "#case"*%d: %d/%d (%3.2f%%) in "                              \
-                            "worst:%0.3f best:%0.3f avg: %0.3f ms\n", count, simpletest_pass(),    \
-                            simpletest_count(), pass_, worst_/1000., best_/1000.,                  \
-                            (end_tick-start_tick)/1000./(count));                                  \
+            simpletest_output("CASE: "#case"*%d: %d/%d (%3.2f%%) in %0.3f ms "                     \
+                            "(%0.3f/%0.3f/%0.3f ms)\n", count, simpletest_pass(),                  \
+                            simpletest_count(), pass_, (end_tick-start_tick)/1000., worst_/1000.,  \
+                            (end_tick-start_tick)/1000./(count), best_/1000.);                     \
         }                                                                                          \
     }                                                                                              \
     static void case_##case()
